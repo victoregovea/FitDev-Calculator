@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitDev Calculator</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --accent-color: #8e44ad;
+      --accent-light: #9b59b6;
+      --text-color: #f5f5f5;
+      --secondary-text: #b0b0b0;
+      --border-color: #333333;
+      --input-bg: #252525;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      --hover-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(142, 68, 173, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(142, 68, 173, 0.05) 0%, transparent 20%);
+      overflow-x: hidden;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    
+    .sidebar {
+      width: 320px;
+      background-color: rgba(30, 30, 30, 0.95);
+      padding: 30px;
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .app-header {
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    h1 {
+      font-size: 36px;
+      background: linear-gradient(135deg, var(--accent-light), var(--success-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-color), transparent);
+    }
+    
+    h2 {
+      margin-bottom: 15px;
+      font-size: 24px;
+      color: var(--accent-light);
+      position: relative;
+      padding-bottom: 8px;
+    }
+    
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--accent-light);
+    }
+    
+    .calculator-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      margin-bottom: 40px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .calculator-card:hover {
+      box-shadow: var(--hover-shadow);
+      transform: translateY(-5px);
+    }
+    
+    .calculator-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent-color), transparent);
+    }
+    
+    .calculator-description {
+      color: var(--secondary-text);
+      margin-bottom: 25px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+    
+    input[type="number"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) inset;
+    }
+    
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
+    }
+    
+    input[type="radio"] {
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .radio-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    button {
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(142, 68, 173, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(142, 68, 173, 0.3);
+    }
+    
+    /* Button click animation */
+    .btn-ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-ripple::after {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transform: scale(10, 10);
+      opacity: 0;
+      transition: transform 0.6s, opacity 0.6s;
+    }
+    
+    .btn-ripple:active::after {
+      transform: scale(0, 0);
+      opacity: 0.3;
+      transition: 0s;
+    }
+    
+    .result {
+      margin-top: 25px;
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-left: 3px solid var(--success-color);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-in 0.5s ease forwards;
+    }
+    
+    @keyframes fade-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .result span {
+      color: var(--success-color);
+      font-weight: bold;
+    }
+    
+    .summary-title {
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: var(--text-color);
+      text-align: center;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .summary-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    }
+    
+    .summary-item {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: transform 0.3s ease;
+    }
+    
+    .summary-item:hover {
+      transform: translateX(5px);
+    }
+    
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+    
+    .summary-label {
+      font-size: 14px;
+      color: var(--secondary-text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .summary-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-color);
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .summary-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--success-color);
+      display: block;
+      transition: all 0.5s ease;
+    }
+    
+    .flex-row {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .flex-row .form-group {
+      flex: 1;
+    }
+    
+    .height-inputs {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .height-inputs .form-group {
+      flex: 1;
+    }
+    
+    .range-container {
+      position: relative;
+      padding-bottom: 30px;
+    }
+    
+    .range-value {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      color: var(--secondary-text);
+    }
+    
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, var(--accent-color), var(--success-color));
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--text-color);
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      border: 2px solid var(--accent-color);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 992px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        order: 2;
+        position: relative;
+        height: auto;
+      }
+      
+      .main-content {
+        order: 1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .flex-row {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      h2 {
+        font-size: 20px;
+      }
+      
+      .calculator-card {
+        padding: 20px;
+      }
+    }
+    
+    /* Animation for numbers */
+    @keyframes countup {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animated-number {
+      display: inline-block;
+      animation: countup 0.5s ease-out forwards;
+    }
+    
+    .pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+    
+    /* Card entrance animations */
+    .card-appear {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: card-appear 0.6s forwards ease;
+    }
+    
+    @keyframes card-appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Add animation delays for staggered entrance */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="main-content">
+      <div class="app-header">
+        <h1>FitDev Calculator</h1>
+        <p class="calculator-description">All the fitness calculators you need - using imperial units to track your progress. Data updates automatically as you input values.</p>
+      </div>
+      
+      <!-- User Info Section -->
+      <div class="calculator-card card-appear">
+        <h2>User Information</h2>
+        <p class="calculator-description">Your basic information is used across all calculators for consistent results.</p>
+        
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="gender" value="male" checked> Male
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="female"> Female
+          </label>
+        </div>
+        
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="age">Age (years)</label>
+            <input type="number" id="age" min="18" max="100" value="30">
+          </div>
+          
+          <div class="form-group">
+            <label for="weight">Weight (lbs)</label>
+            <input type="number" id="weight" min="88" max="440" value="154">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="height">Height</label>
+          <div class="height-inputs">
+            <div class="form-group">
+              <input type="number" id="heightFeet" min="4" max="7" value="5" placeholder="Feet">
+            </div>
+            <div class="form-group">
+              <input type="number" id="heightInches" min="0" max="11" value="9" placeholder="Inches">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="bodyFat">Body Fat Percentage (optional)</label>
+          <input type="number" id="bodyFat" min="5" max="50" placeholder="Enter if known">
+        </div>
+      </div>
+      
+      <!-- BMR Calculator -->
+      <div class="calculator-card card-appear delay-1">
+        <h2>BMR Calculator</h2>
+        <p class="calculator-description">Calculates your Basal Metabolic Rate (BMR) - the number of calories your body needs while resting for 24 hours. Uses the Harris-Benedict formula.</p>
+        
+        <button id="calculateBMR" class="btn-ripple">Calculate BMR</button>
+        
+        <div class="result" id="bmrResult" style="display: none;"></div>
+      </div>
+      
+      <!-- TDEE Calculator -->
+      <div class="calculator-card card-appear delay-2">
+        <h2>TDEE Calculator</h2>
+        <p class="calculator-description">Estimates your Total Daily Energy Expenditure based on your BMR and activity levels.</p>
+        
+        <div class="form-group">
+          <label for="walkingTime">Minutes spent walking per day</label>
+          <input type="number" id="walkingTime" min="0" max="300" value="30">
+        </div>
+        
+        <div class="form-group">
+          <label for="liftingTime">Hours spent weight training per week</label>
+          <input type="number" id="liftingTime" min="0" max="20" value="3" step="0.5">
+        </div>
+        
+        <div class="form-group">
+          <label for="standingTime">Hours spent standing per day</label>
+          <input type="number" id="standingTime" min="0" max="16" value="4">
+        </div>
+        
+        <button id="calculateTDEE" class="btn-ripple">Calculate TDEE</button>
+        
+        <div class="result" id="tdeeResult" style="display: none;"></div>
+      </div>
+      
+      <!-- Protein Intake Calculator -->
+      <div class="calculator-card card-appear delay-3">
+        <h2>Protein Intake Calculator</h2>
+        <p class="calculator-description">Recommends your daily protein intake based on your body weight or lean body mass.</p>
+        
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="proteinCalcMethod" value="weight" checked> Based on Total Weight
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="proteinCalcMethod" value="leanMass"> Based on Lean Mass
+          </label>
+        </div>
+        
+        <button id="calculateProtein" class="btn-ripple">Calculate Protein Needs</button>
+        
+        <div class="result" id="proteinResult" style="display: none;"></div>
+      </div>
+      
+      <!-- Calorie Deficit Estimator -->
+      <div class="calculator-card card-appear delay-4">
+        <h2>Calorie Deficit Estimator</h2>
+        <p class="calculator-description">Estimates weight loss based on a daily calorie deficit. A pound of fat is approximately 3,500 calories.</p>
+        
+        <div class="form-group range-container">
+          <label for="deficitAmount">Daily Calorie Deficit</label>
+          <input type="range" id="deficitAmount" min="250" max="1000" step="50" value="500">
+          <div class="range-value" id="deficitOutput">500 calories</div>
+        </div>
+        
+        <button id="calculateDeficit" class="btn-ripple">Calculate Weight Loss Projections</button>
+        
+        <div class="result" id="deficitResult" style="display: none;"></div>
+      </div>
+    </div>
+    
+    <!-- Summary Sidebar -->
+    <div class="sidebar">
+      <h2 class="summary-title">Your Fitness Summary</h2>
+      
+      <div class="summary-item">
+        <div class="summary-label">Basal Metabolic Rate</div>
+        <div class="summary-value" id="summaryBMR">--</div>
+      </div>
+      
+      <div class="summary-item">
+        <div class="summary-label">Total Daily Energy</div>
+        <div class="summary-value" id="summaryTDEE">--</div>
+      </div>
+      
+      <div class="summary-item">
+        <div class="summary-label">Daily Protein Target</div>
+        <div class="summary-value" id="summaryProtein">--</div>
+      </div>
+      
+      <div class="summary-item">
+        <div class="summary-label">Calorie Goal (Deficit)</div>
+        <div class="summary-value" id="summaryCalories">--</div>
+      </div>
+      
+      <div class="summary-item">
+        <div class="summary-label">Projected Monthly Loss</div>
+        <div class="summary-value" id="summaryLoss">--</div>
+      </div>
+      
+      <!-- Credit card in sidebar -->
+      <div class="credit-card" style="
+        background: linear-gradient(145deg, var(--accent-color), #433068);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 40px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+      ">
+        <div style="position: relative; z-index: 2;">
+          <div style="font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; color: rgba(255,255,255,0.8);">CRAFTED WITH <span style="color: #ffffff;">♦</span> BY</div>
+          <div style="font-size: 22px; font-weight: 700; letter-spacing: 2px; color: #ffffff; margin: 5px 0;">VICTOR <span style="color: #8EEEE5;">GO</span>VEA</div>
+          <div style="font-size: 10px; color: rgba(255,255,255,0.6);">© 2025 • ALL RIGHTS RESERVED</div>
+        </div>
+        <div style="position: absolute; bottom: -30px; right: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+        <div style="position: absolute; top: -20px; left: -20px; width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Store user data
+    let userData = {
+      gender: 'male',
+      age: 30,
+      weightLbs: 154,
+      heightInches: 69, // 5'9"
+      bmr: 0,
+      tdee: 0,
+      proteinTarget: 0,
+      calorieGoal: 0,
+      weightLoss: 0
+    };
+    
+    // DOM elements
+    const genderInputs = document.querySelectorAll('input[name="gender"]');
+    const ageInput = document.getElementById('age');
+    const weightInput = document.getElementById('weight');
+    const heightFeetInput = document.getElementById('heightFeet');
+    const heightInchesInput = document.getElementById('heightInches');
+    const bodyFatInput = document.getElementById('bodyFat');
+    
+    const calculateBMRBtn = document.getElementById('calculateBMR');
+    const bmrResultDiv = document.getElementById('bmrResult');
+    
+    const walkingTimeInput = document.getElementById('walkingTime');
+    const liftingTimeInput = document.getElementById('liftingTime');
+    const standingTimeInput = document.getElementById('standingTime');
+    const calculateTDEEBtn = document.getElementById('calculateTDEE');
+    const tdeeResultDiv = document.getElementById('tdeeResult');
+    
+    const proteinMethodInputs = document.querySelectorAll('input[name="proteinCalcMethod"]');
+    const calculateProteinBtn = document.getElementById('calculateProtein');
+    const proteinResultDiv = document.getElementById('proteinResult');
+    
+    const deficitSlider = document.getElementById('deficitAmount');
+    const deficitOutput = document.getElementById('deficitOutput');
+    const calculateDeficitBtn = document.getElementById('calculateDeficit');
+    const deficitResultDiv = document.getElementById('deficitResult');
+    
+    // Summary elements
+    const summaryBMR = document.getElementById('summaryBMR');
+    const summaryTDEE = document.getElementById('summaryTDEE');
+    const summaryProtein = document.getElementById('summaryProtein');
+    const summaryCalories = document.getElementById('summaryCalories');
+    const summaryLoss = document.getElementById('summaryLoss');
+    
+    // Automatically update user data when inputs change
+    function updateUserData() {
+      userData.gender = document.querySelector('input[name="gender"]:checked').value;
+      userData.age = parseInt(ageInput.value) || 30;
+      userData.weightLbs = parseFloat(weightInput.value) || 154;
+      
+      // Convert feet and inches to total inches
+      const feet = parseInt(heightFeetInput.value) || 5;
+      const inches = parseInt(heightInchesInput.value) || 9;
+      userData.heightInches = (feet * 12) + inches;
+      
+      // Clear previous calculations that depend on user data
+      userData.bmr = 0;
+      userData.tdee = 0;
+      userData.proteinTarget = 0;
+      userData.calorieGoal = 0;
+      userData.weightLoss = 0;
+      
+      // Clear result displays
+      bmrResultDiv.style.display = 'none';
+      tdeeResultDiv.style.display = 'none';
+      proteinResultDiv.style.display = 'none';
+      deficitResultDiv.style.display = 'none';
+      
+      // Reset summary values
+      summaryBMR.textContent = '--';
+      summaryTDEE.textContent = '--';
+      summaryProtein.textContent = '--';
+      summaryCalories.textContent = '--';
+      summaryLoss.textContent = '--';
+    }
+    
+    // Add event listeners to all inputs for auto-updating
+    genderInputs.forEach(input => input.addEventListener('change', updateUserData));
+    ageInput.addEventListener('input', updateUserData);
+    weightInput.addEventListener('input', updateUserData);
+    heightFeetInput.addEventListener('input', updateUserData);
+    heightInchesInput.addEventListener('input', updateUserData);
+    bodyFatInput.addEventListener('input', updateUserData);
+    
+    // Event listeners for calculator buttons
+    calculateBMRBtn.addEventListener('click', calculateBMR);
+    calculateTDEEBtn.addEventListener('click', calculateTDEE);
+    calculateProteinBtn.addEventListener('click', calculateProtein);
+    calculateDeficitBtn.addEventListener('click', calculateDeficit);
+    
+    // Update deficit slider output
+    deficitSlider.addEventListener('input', function() {
+      deficitOutput.textContent = this.value + ' calories';
+    });
+    
+    // Add button ripple effect
+    document.querySelectorAll('.btn-ripple').forEach(button => {
+      button.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const circle = document.createElement('span');
+        circle.style.cssText = `
+          position: absolute;
+          background: rgba(255, 255, 255, 0.7);
+          border-radius: 50%;
+          pointer-events: none;
+          width: ${this.offsetWidth * 2}px;
+          height: ${this.offsetWidth * 2}px;
+          top: ${y - this.offsetWidth}px;
+          left: ${x - this.offsetWidth}px;
+          transform: scale(0);
+          opacity: 1;
+          transition: transform 0.5s, opacity 0.5s;
+        `;
+        
+        this.appendChild(circle);
+        
+        setTimeout(() => {
+          circle.style.transform = 'scale(1)';
+          circle.style.opacity = '0';
+          setTimeout(() => {
+            circle.remove();
+          }, 500);
+        }, 10);
+      });
+    });
+    
+    // Calculate BMR using Katch-McArdle or Harris-Benedict formula
+    function calculateBMR() {
+      let bmr = 0;
+      let formulaUsed = "";
+      
+      // Convert lbs to kg for the formula
+      const weightKg = userData.weightLbs * 0.453592;
+      
+      // Convert inches to cm for the formula
+      const heightCm = userData.heightInches * 2.54;
+      
+      // If body fat percentage is known, use Katch-McArdle formula
+      if (bodyFatInput.value) {
+        const bodyFat = parseFloat(bodyFatInput.value) / 100;
+        const leanMassKg = weightKg * (1 - bodyFat);
+        
+        // Katch-McArdle formula
+        bmr = 370 + (21.6 * leanMassKg);
+        formulaUsed = "Katch-McArdle";
+      }
+      // Otherwise use Harris-Benedict formula
+      else {
+        if (userData.gender === 'male') {
+          bmr = 88.362 + (13.397 * weightKg) + (4.799 * heightCm) - (5.677 * userData.age);
+        } else {
+          bmr = 447.593 + (9.247 * weightKg) + (3.098 * heightCm) - (4.330 * userData.age);
+        }
+        formulaUsed = "Harris-Benedict";
+      }
+      
+      bmr = Math.round(bmr);
+      userData.bmr = bmr;
+      
+      // Show the result
+      bmrResultDiv.innerHTML = `Your Basal Metabolic Rate (BMR) is <span class="animated-number">${bmr}</span> calories per day.<br>
+      <small>Calculated using the ${formulaUsed} formula based on your metrics.</small>`;
+      bmrResultDiv.style.display = 'block';
+      
+      // Update summary
+      updateSummaryValue(summaryBMR, bmr);
+    }
+    
+    // Calculate TDEE based on activities
+    function calculateTDEE() {
+      if (userData.bmr === 0) {
+        calculateBMR(); // Auto-calculate BMR if not done
+      }
+      
+      const walkingMinutes = parseInt(walkingTimeInput.value) || 0;
+      const liftingMinutesWeekly = parseInt(liftingTimeInput.value) || 0;
+      const standingHours = parseInt(standingTimeInput.value) || 0;
+      
+      // Convert hours per week to minutes per day
+      const liftingMinutes = (liftingMinutesWeekly * 60) / 7;
+      
+      // Convert weight to kg for calculations
+      const weightKg = userData.weightLbs * 0.453592;
+      
+      // Calories burned per minute/hour for each activity (estimates)
+      const walkingCaloriesPerMinute = 0.0675 * weightKg; // ~4.05 cal/min for 60kg person
+      const liftingCaloriesPerMinute = 0.0825 * weightKg; // ~4.95 cal/min for 60kg person
+      const standingCaloriesPerHour = 0.15 * weightKg; // ~9 cal/hour for 60kg person
+      
+      const walkingCalories = walkingMinutes * walkingCaloriesPerMinute;
+      const liftingCalories = liftingMinutes * liftingCaloriesPerMinute;
+      const standingCalories = standingHours * standingCaloriesPerHour;
+      
+      // Add activity calories to BMR
+      const tdee = Math.round(userData.bmr + walkingCalories + liftingCalories + standingCalories);
+      userData.tdee = tdee;
+      
+      // Show the result
+      tdeeResultDiv.innerHTML = `
+        Your Total Daily Energy Expenditure (TDEE) is <span class="animated-number">${tdee}</span> calories per day.<br>
+        <small>(BMR: ${userData.bmr} + Walking: ${Math.round(walkingCalories)} + Lifting: ${Math.round(liftingCalories)} + Standing: ${Math.round(standingCalories)})</small>
+      `;
+      tdeeResultDiv.style.display = 'block';
+      
+      // Update summary
+      updateSummaryValue(summaryTDEE, tdee);
+    }
+    
+    // Calculate protein needs
+    function calculateProtein() {
+      const method = document.querySelector('input[name="proteinCalcMethod"]:checked').value;
+      let proteinTarget = 0;
+      
+      // Convert weight to kg
+      const weightKg = userData.weightLbs * 0.453592;
+      let leanMassKg = weightKg;
+      
+      // Calculate lean mass if body fat % is provided
+      if (bodyFatInput.value) {
+        const bodyFat = parseFloat(bodyFatInput.value) / 100;
+        leanMassKg = weightKg * (1 - bodyFat);
+      }
+      
+      if (method === 'weight') {
+        // 0.8-1.0g protein per lb of total body weight (using 0.82 as middle ground)
+        proteinTarget = Math.round(userData.weightLbs * 0.82);
+        proteinResultDiv.innerHTML = `
+          Based on your total weight (${userData.weightLbs} lbs), you should consume approximately 
+          <span class="animated-number">${proteinTarget}</span> grams of protein daily (0.82g per lb of body weight).
+        `;
+      } else {
+        // 1.0-1.2g protein per lb of lean mass (using 1.1 as middle ground)
+        const leanMassLbs = leanMassKg * 2.20462;
+        proteinTarget = Math.round(leanMassLbs * 1.1);
+        proteinResultDiv.innerHTML = `
+          Based on your lean body mass (${leanMassLbs.toFixed(1)} lbs), you should consume approximately 
+          <span class="animated-number">${proteinTarget}</span> grams of protein daily (1.1g per lb of lean mass).
+        `;
+      }
+      
+      userData.proteinTarget = proteinTarget;
+      proteinResultDiv.style.display = 'block';
+      
+      // Update summary
+      updateSummaryValue(summaryProtein, `${proteinTarget}g`);
+    }
+    
+    // Calculate calorie deficit and weight loss
+    function calculateDeficit() {
+      if (userData.tdee === 0) {
+        calculateTDEE(); // Auto-calculate TDEE if not done
+      }
+      
+      const deficit = parseInt(deficitAmount.value);
+      const calorieGoal = userData.tdee - deficit;
+      
+      // Calculate weight loss (3500 calories = 1 pound of fat)
+      const weeklyDeficit = deficit * 7;
+      const weeklyLossLbs = weeklyDeficit / 3500;
+      const monthlyLossLbs = weeklyLossLbs * 4.33; // Average weeks in a month
+      
+      userData.calorieGoal = calorieGoal;
+      userData.weightLoss = monthlyLossLbs;
+      
+      deficitResultDiv.innerHTML = `
+        With a daily deficit of <span class="animated-number">${deficit}</span> calories:<br>
+        - Your daily calorie goal is <strong>${calorieGoal}</strong> calories<br>
+        - Estimated weight loss: <strong>${weeklyLossLbs.toFixed(2)} lbs</strong> per week<br>
+        - Estimated weight loss: <strong>${monthlyLossLbs.toFixed(2)} lbs</strong> per month
+      `;
+      deficitResultDiv.style.display = 'block';
+      
+      // Update summary
+      updateSummaryValue(summaryCalories, calorieGoal);
+      updateSummaryValue(summaryLoss, `${monthlyLossLbs.toFixed(2)} lbs/month`);
+    }
+    
+    // Helper function to update summary values with animation
+    function updateSummaryValue(element, newValue) {
+      // Clear any previous animation classes
+      element.classList.remove('animated-number');
+      
+      // For numerical values, animate the transition
+      if (!isNaN(newValue)) {
+        let oldValue = parseInt(element.textContent) || 0;
+        if (oldValue !== newValue) {
+          // For large jumps, don't animate each step
+          if (Math.abs(oldValue - newValue) > 100) {
+            element.textContent = newValue;
+            element.classList.add('animated-number');
+          } else {
+            animateNumber(element, oldValue, newValue);
+          }
+        }
+      } else {
+        // For non-numerical values, just replace with animation
+        element.textContent = newValue;
+        element.classList.add('animated-number');
+      }
+    }
+    
+    // Animate number counting
+    function animateNumber(element, start, end, duration = 1000) {
+      if (start === end) return;
+      
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const currentValue = Math.floor(progress * (end - start) + start);
+        element.textContent = currentValue;
+        
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          element.textContent = end;
+        }
+      };
+      
+      window.requestAnimationFrame(step);
+    }
+    
+    // Add staggered entrance animations for cards
+    document.addEventListener('DOMContentLoaded', function() {
+      const cards = document.querySelectorAll('.card-appear');
+      cards.forEach((card) => {
+        card.classList.add('card-appear');
+      });
+    });
+  </script>
+  <!-- Removed footer with credit button as it's now in the sidebar -->
+</body>
+</html>
